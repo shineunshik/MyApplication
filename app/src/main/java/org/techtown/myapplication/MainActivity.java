@@ -41,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     int num = 1;
 
+    Button refresh;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
 
                 setContentView(R.layout.bus_map);
+
                 mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
                 mapFragment.getMapAsync(MainActivity.this::onMapReady);  // <-이코드 됨
 
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-
+        refresh = (Button)findViewById(R.id.refresh);
         mMap.setOnMyLocationButtonClickListener(this); //나침반을 누르면 나의 위치로 이동 기능
         mMap.setOnMyLocationClickListener(this); //나침반을 누르면 나의 위치로 이동 기능
 
@@ -140,12 +143,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     }
                                 }
                             });
+
+
+                        refresh.setOnClickListener(new View.OnClickListener() { //새로 고침
+                            @Override
+                            public void onClick(View view) {
+
+                                mMap.clear(); //버스의 위치가 실시간으로 업데이트되면서 위치를 덮어쓰지못해 clear를 해줌으로써 중복이 되지않고 최신 상태 유지
+
+                                for (int i = 0; i < apiExplorer.arrayList.size(); i++) {
+
+                                    double lat,lng;
+                                    lat = apiExplorer.arrayList.get(i).getGpslati();
+                                    lng = apiExplorer.arrayList.get(i).getGpslong();
+                                    LatLng bus_addresss = new LatLng(lat,lng);
+                                    Marker nMarker = mMap.addMarker(new MarkerOptions().position(bus_addresss).title(apiExplorer.arrayList.get(i).getVehicleno()));
+                                    nMarker.setPosition(bus_addresss);
+
+                                    System.out.println("새로고침 성공 : "+  bus_addresss );
+                                }
+
+
+                                Toast.makeText(MainActivity.this,"성공",Toast.LENGTH_LONG).show();
+                            }
+                        });
+
                         }
                     }).start();
 
                    }
                 };
             timer.schedule(timerTask,0,5000);
+
+
 
     }
 
