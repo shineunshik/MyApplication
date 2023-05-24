@@ -33,8 +33,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
     @Override
     public void onBindViewHolder(@NonNull CustomViewHolder holder, int position) {
 
-        holder.bus_lati.setText(arrayList.get(position).getGpslati());
-        holder.bus_long.setText(arrayList.get(position).getGpslong());
+     //   holder.bus_lati.setText(arrayList.get(position).getGpslati());
+     //   holder.bus_long.setText(arrayList.get(position).getGpslong());
 
     }
 

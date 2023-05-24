@@ -4,14 +4,21 @@ import java.io.Serializable;
 
 public class Ob implements Serializable {
 
+    String vehicleno;
     String plateNo;
-    String gpslati;
-    String gpslong;
+    Double gpslati;
+    Double gpslong;
     public Ob(){
 
     }
 
+    public String getVehicleno() {
+        return vehicleno;
+    }
 
+    public void setVehicleno(String vehicleno) {
+        this.vehicleno = vehicleno;
+    }
 
     public String getPlateNo() {
         return plateNo;
@@ -20,19 +27,19 @@ public class Ob implements Serializable {
         this.plateNo = plateNo;
     }
 
-    public String getGpslati() {
+    public Double getGpslati() {
         return gpslati;
     }
 
-    public void setGpslati(String gpslati) {
+    public void setGpslati(Double gpslati) {
         this.gpslati = gpslati;
     }
 
-    public String getGpslong() {
+    public Double getGpslong() {
         return gpslong;
     }
 
-    public void setGpslong(String gpslong) {
+    public void setGpslong(Double gpslong) {
         this.gpslong = gpslong;
     }
 }

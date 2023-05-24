@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,12 +32,16 @@ public  class ApiExplorer {
     NodeList nlList;
     Node nValue;
     CopyOnWriteArrayList<LatLng> locationArrayList;
+    ArrayList<Ob> arrayList;
+    Ob ob;
+
 
     public  void cc() throws IOException {
 
              try{
 
                 locationArrayList = new CopyOnWriteArrayList<>();
+                arrayList = new ArrayList<>();
                 StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1613000/BusLcInfoInqireService/getRouteAcctoBusLcList"); /*URL*/
                 urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=mpCKK0vB8d8I%2FXawDUzzlAsLZVdxFbFTUSFg6sBzw9tp3kLhU7H%2Bu2qlNbNaI0IK8gD0NK4Laky19EEQo3qALg%3D%3D"); /*Service Key*/
                 urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
@@ -95,6 +100,14 @@ public  class ApiExplorer {
                         Element eElement = (Element) nNode;
                         LatLng address = new LatLng(Double.parseDouble(getTagValue("gpslati", eElement)), Double.parseDouble(getTagValue("gpslong", eElement)));
                         locationArrayList.add(address);
+                        System.out.println("성공성22222222 : "+locationArrayList);
+
+                        ob = new Ob();
+                        ob.setVehicleno(getTagValue("vehicleno", eElement));
+                        ob.setGpslati(Double.parseDouble(getTagValue("gpslati",eElement)));
+                        ob.setGpslong(Double.parseDouble(getTagValue("gpslong",eElement)));
+
+                        arrayList.add(ob);
 
                     }
 
