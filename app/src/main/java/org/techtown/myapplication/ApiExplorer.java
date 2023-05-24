@@ -24,23 +24,14 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public  class ApiExplorer {
 
-    LatLng sydney = new LatLng(-34, 151);
-    LatLng TamWorth = new LatLng(-31.083332, 150.916672);
-    LatLng NewCastle = new LatLng(-32.916668, 151.750000);
-    LatLng Brisbane = new LatLng(-27.470125, 153.021072);
-
     NodeList nlList;
     Node nValue;
-    CopyOnWriteArrayList<LatLng> locationArrayList;
     ArrayList<Ob> arrayList;
     Ob ob;
-
 
     public  void cc() throws IOException {
 
              try{
-
-                locationArrayList = new CopyOnWriteArrayList<>();
                 arrayList = new ArrayList<>();
                 StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1613000/BusLcInfoInqireService/getRouteAcctoBusLcList"); /*URL*/
                 urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=mpCKK0vB8d8I%2FXawDUzzlAsLZVdxFbFTUSFg6sBzw9tp3kLhU7H%2Bu2qlNbNaI0IK8gD0NK4Laky19EEQo3qALg%3D%3D"); /*Service Key*/
@@ -83,12 +74,6 @@ public  class ApiExplorer {
                 if (nList.getLength() == 0) {//list에 데이터가 없으면
                     System.out.println("111111111111111\n2222222222222222\n3333333333333333\n44444444444444");
                 }
-//
-//                    locationArrayList.add(sydney);
-//                    locationArrayList.add(TamWorth);
-//                    locationArrayList.add(NewCastle);
-//                    locationArrayList.add(Brisbane);
-
 
             //for문 밑으로는  api가 작동하지않으면 안돌아감 내일 다시 확인
             //안됐던 이유는 변수들이 지역번수라서 안됐던거 같음
@@ -98,21 +83,14 @@ public  class ApiExplorer {
                     if (nNode.getNodeType() == Node.ELEMENT_NODE) { //노드 type이 같을 경우에 실행
                         //log 확인 작업
                         Element eElement = (Element) nNode;
-                        LatLng address = new LatLng(Double.parseDouble(getTagValue("gpslati", eElement)), Double.parseDouble(getTagValue("gpslong", eElement)));
-                        locationArrayList.add(address);
-                        System.out.println("성공성22222222 : "+locationArrayList);
 
                         ob = new Ob();
                         ob.setVehicleno(getTagValue("vehicleno", eElement));
                         ob.setGpslati(Double.parseDouble(getTagValue("gpslati",eElement)));
                         ob.setGpslong(Double.parseDouble(getTagValue("gpslong",eElement)));
-
                         arrayList.add(ob);
-
                     }
-
                 }
-
             }
             catch (IOException e){
                 System.out.println("IOException : 실패");
@@ -127,7 +105,7 @@ public  class ApiExplorer {
 
     }
 
-    public  String getTagValue(String tag, Element eElement){
+    public  String getTagValue(String tag, Element eElement){ //xml에서 파싱할 데이터 찾기
         nlList = eElement.getElementsByTagName(tag).item(0).getChildNodes();
         nValue = (Node) nlList.item(0);
         if (nValue == null)
