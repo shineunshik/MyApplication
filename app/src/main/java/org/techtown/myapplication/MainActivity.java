@@ -43,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     Button refresh;
 
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMyLocationButtonClickListener(this); //나침반을 누르면 나의 위치로 이동 기능
         mMap.setOnMyLocationClickListener(this); //나침반을 누르면 나의 위치로 이동 기능
 
+        mMap.getUiSettings().setZoomControlsEnabled(true); //확대/축소 버튼
+        mMap.getUiSettings().setMapToolbarEnabled(false); //마켜 클릭했을때 네비게이션 기능 표시 여부
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -138,8 +143,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         lat = apiExplorer.arrayList.get(i).getGpslati();
                                         lng = apiExplorer.arrayList.get(i).getGpslong();
                                         LatLng bus_addresss = new LatLng(lat,lng);
-                                        Marker nMarker = mMap.addMarker(new MarkerOptions().position(bus_addresss).title(apiExplorer.arrayList.get(i).getVehicleno()));
+                                        Marker nMarker = mMap.addMarker(new MarkerOptions()
+                                                .position(bus_addresss)
+                                                .title("차량번호:"+apiExplorer.arrayList.get(i).getVehicleno())
+                                                .snippet("노선번호:"+apiExplorer.arrayList.get(i).getRoutenm()+"\n"+
+                                                        "현재 정류장:"+apiExplorer.arrayList.get(i).getNodenm()));
                                         nMarker.setPosition(bus_addresss);
+                                       // nMarker.showInfoWindow(); //정보창을 띄어주는 녀석인데 마지막꺼 하나만 띄워줌
                                     }
                                 }
                             });
@@ -225,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             String message = "내 위치 -> Latitude : "+ latitude + "\nLongitude:"+ longitude;
             Log.d("Map", message);
 
-            showCurrentLocation(latitude, longitude);
+          //  showCurrentLocation(latitude, longitude);
 
 
         }
@@ -241,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng curPoint = new LatLng(latitude, longitude);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15));
 
-        showMyLocationMarker(curPoint);
+     //   showMyLocationMarker(curPoint);
     }
 
     private void showMyLocationMarker(LatLng curPoint) {
@@ -273,5 +283,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onPointerCaptureChanged(hasCapture);
     }
 }
+
 
 

@@ -4,12 +4,29 @@ import java.io.Serializable;
 
 public class Ob implements Serializable {
 
-    String vehicleno;
-    String plateNo;
+    String vehicleno; //버스 번호판
+    String nodenm;
+    String routenm;
     Double gpslati;
     Double gpslong;
     public Ob(){
 
+    }
+
+    public String getNodenm() {
+        return nodenm;
+    }
+
+    public void setNodenm(String nodenm) {
+        this.nodenm = nodenm;
+    }
+
+    public String getRoutenm() {
+        return routenm;
+    }
+
+    public void setRoutenm(String routenm) {
+        this.routenm = routenm;
     }
 
     public String getVehicleno() {
@@ -20,12 +37,6 @@ public class Ob implements Serializable {
         this.vehicleno = vehicleno;
     }
 
-    public String getPlateNo() {
-        return plateNo;
-    }
-    public void setPlateNo(String plateNo) {
-        this.plateNo = plateNo;
-    }
 
     public Double getGpslati() {
         return gpslati;

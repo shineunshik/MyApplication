@@ -88,6 +88,8 @@ public  class ApiExplorer {
                         ob.setVehicleno(getTagValue("vehicleno", eElement));
                         ob.setGpslati(Double.parseDouble(getTagValue("gpslati",eElement)));
                         ob.setGpslong(Double.parseDouble(getTagValue("gpslong",eElement)));
+                        ob.setNodenm(getTagValue("nodenm",eElement));
+                        ob.setRoutenm(getTagValue("routenm",eElement));
                         arrayList.add(ob);
                     }
                 }
