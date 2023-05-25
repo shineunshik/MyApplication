@@ -4,11 +4,19 @@ import java.io.Serializable;
 
 public class Ob implements Serializable {
 
+    Double gpslati; //위도
+    Double gpslong; //경도
     String vehicleno; //버스 번호판
-    String nodenm;
-    String routenm;
-    Double gpslati;
-    Double gpslong;
+    String nodenm; //정류소
+    String routenm; //노선번호
+
+    public Ob(Double gpslati,Double gpslong,String vehicleno,String nodenm,String routenm){
+        this.gpslati = gpslati;
+        this.gpslong = gpslong;
+        this.vehicleno = vehicleno;
+        this.nodenm = nodenm;
+        this.routenm = routenm;
+    }
     public Ob(){
 
     }

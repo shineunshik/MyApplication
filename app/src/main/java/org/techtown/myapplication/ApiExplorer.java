@@ -27,7 +27,7 @@ public  class ApiExplorer {
     NodeList nlList;
     Node nValue;
     ArrayList<Ob> arrayList;
-    Ob ob;
+    Ob ob,ob1;
 
     public  void cc() throws IOException {
 
@@ -72,6 +72,21 @@ public  class ApiExplorer {
                 NodeList nList = document.getElementsByTagName("item"); //xml에서 파싱할 리스트명
 
                 if (nList.getLength() == 0) {//list에 데이터가 없으면
+                    //테스트용
+                    ob = new Ob();
+                    ob.setVehicleno("부산 바 1234");
+                    ob.setGpslati(37.432124);
+                    ob.setGpslong(127.129064);
+                    ob.setNodenm("모란역");
+                    ob.setRoutenm("333");
+                    arrayList.add(ob);
+                    ob1 = new Ob();
+                    ob1.setVehicleno("부산 바 5678");
+                    ob1.setGpslati(37.439854);
+                    ob1.setGpslong(127.128035);
+                    ob1.setNodenm("태평역");
+                    ob1.setRoutenm("51");
+                    arrayList.add(ob1);
                     System.out.println("111111111111111\n2222222222222222\n3333333333333333\n44444444444444");
                 }
 
@@ -90,6 +105,7 @@ public  class ApiExplorer {
                         ob.setGpslong(Double.parseDouble(getTagValue("gpslong",eElement)));
                         ob.setNodenm(getTagValue("nodenm",eElement));
                         ob.setRoutenm(getTagValue("routenm",eElement));
+
                         arrayList.add(ob);
                     }
                 }
