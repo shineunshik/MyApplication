@@ -9,6 +9,7 @@ public class Ob implements Serializable {
     String vehicleno; //버스 번호판
     String nodenm; //정류소
     String routenm; //노선번호
+    String  nodeid ; //노선ID
 
     public Ob(Double gpslati,Double gpslong,String vehicleno,String nodenm,String routenm){
         this.gpslati = gpslati;

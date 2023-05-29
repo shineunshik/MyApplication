@@ -23,7 +23,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, GoogleMap.OnMarkerClickListener{
 
     GoogleMap mMap;
     Button change;
@@ -55,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     TextView name;
     View Custom_Marker;
     Marker selectedMarker;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,8 +89,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         mMap.setMyLocationEnabled(true); //나침반 기능 사용 유무
+        mMap.setOnMarkerClickListener(this);
 
-        setCustomMarkerView();
+        setCustomMarkerView(); //custom marker
         getSampleMarkerItems();
 
     }
@@ -192,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+
+
     private void setCustomMarkerView(){
         Custom_Marker = LayoutInflater.from(this).inflate(R.layout.custom_marker,null);
         name = (TextView) Custom_Marker.findViewById(R.id.name);
@@ -272,14 +276,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 mMap.clear(); //버스의 위치가 실시간으로 업데이트되면서 위치를 덮어쓰지못해 clear를 해줌으로써 중복이 되지않고 최신 상태 유지
 
                                 for (int i = 0; i < apiExplorer.arrayList.size(); i++) {
-                                    ArrayList<Ob> multi_marker_list = new ArrayList<>();
 
+                                    ArrayList<Ob> multi_marker_list = new ArrayList<>();
                                     multi_marker_list.add(new Ob(apiExplorer.arrayList.get(i).getGpslati(),apiExplorer.arrayList.get(i).getGpslong(),
                                             apiExplorer.arrayList.get(i).getVehicleno(),apiExplorer.arrayList.get(i).getNodenm(),apiExplorer.arrayList.get(i).getRoutenm()));
                                     for (Ob ob : multi_marker_list){
                                         addCustomMarker(ob,false);
                                     }
                                 }
+
+
                             }
                         });
 
@@ -317,8 +323,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker addCustomMarker(Ob ob, boolean isSelectedMarker) {
 
         LatLng position = new LatLng(ob.getGpslati(),ob.getGpslong());
-        name.setText("차량번호:"+ob.getVehicleno()+"\n"+"노선번호:"+ob.getRoutenm());
+        name.setText("차량번호:"+ob.getVehicleno()+"\n"+"노선번호:"+ob.getRoutenm()+"\n"+"정류장:"+ob.getNodenm());
         //이게 기본으로 뜨는 정보
+
 
 
         if (isSelectedMarker) {
@@ -331,10 +338,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         MarkerOptions markerOptions = new MarkerOptions();
-      //  markerOptions.title("차량번호:"+ob.getVehicleno());
+        markerOptions.title("차량번호:"+ob.getVehicleno());
       //  markerOptions.snippet("노선번호:"+ob.getRoutenm()+"\n"+"현재 정류장:"+ob.getNodenm());
+        markerOptions.snippet("현재 정류장:"+ob.getNodenm());
         markerOptions.position(position);
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this, Custom_Marker)));
+
+        //markeroption에서는 저장할수있는 정보가 정해져있어서
+        //내가 원하는 정보를 저장하려면 새로운 marker형식의 저장소를 만들어 내가 원하는
+        //데이터를 / 슬래쉬로 구분하여 전부 집어 넣음
+        //정보를 빼서 쓸때는 슬래쉬로 구분하여 뺴서 씀
+        Marker marker = mMap.addMarker(markerOptions);
+        marker.setTag(ob.getVehicleno()+"/"+ob.getNodenm()+"/"+ob.getRoutenm()+"/");
 
 
         //눌렀을때 떠있는 기본 정보
@@ -342,8 +357,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //여기서 클릭 리스너 구현을 하고 클릭했을때 밑에 상세정보 카드뷰가 나오게 하기
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
-                Toast.makeText(MainActivity.this,ob.getNodenm(),Toast.LENGTH_LONG).show();
-
+                //정보를 빼서 쓸때는 슬래쉬로 구분하여 뺴서 씀
+                String[] arr = marker.getTag().toString().split("/");
+                Toast.makeText(MainActivity.this,arr[0]+"\n"+arr[1]+"\n"+arr[2],Toast.LENGTH_SHORT).show();
+                //marker 클릭했을때 원하는 정보 띄우는거까지 성공
                 return false;
             }
         });
@@ -351,6 +368,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return mMap.addMarker(markerOptions);
 
     }
+
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        return false;
+    }
+
 
     private Bitmap createDrawableFromView(Context context, View view) {
 
@@ -366,6 +390,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         return bitmap;
     }
+
+
+//     new Thread(new Runnable() {
+//        public void run() {
+//
+//            apiExplorer = new ApiExplorer();
+//
+//            try {
+//                apiExplorer.cc();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//            runOnUiThread(new Runnable() {//스레드 안에서 ui를 변경할 수 있게 해주는 스레드
+//                public void run() {
+//
+//
+//
+//                }
+//            });
+//
+//
+//
+//        }
+//    }).start();
+
 
 
 
