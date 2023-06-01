@@ -31,6 +31,7 @@ public  class ApiExplorer {
 
     public  void cc() throws IOException {
 
+
              try{
                 arrayList = new ArrayList<>();
                 StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1613000/BusLcInfoInqireService/getRouteAcctoBusLcList"); /*URL*/
@@ -120,6 +121,8 @@ public  class ApiExplorer {
                 System.out.println("SAXException : 실패");
                 e.printStackTrace();
             }
+
+
 
     }
 

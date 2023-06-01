@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -40,7 +41,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, GoogleMap.OnMarkerClickListener{
 
     GoogleMap mMap;
-    Button change;
+    Button change,change2;
     SupportMapFragment mapFragment;
     Timer timer;
     TimerTask timerTask;
@@ -70,6 +71,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
                 mapFragment.getMapAsync(MainActivity.this::onMapReady);  // <-이코드 됨
+
+            }
+        });
+
+        change2 = (Button) findViewById(R.id.change2);
+        change2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(MainActivity.this,PlaceBusSelect.class);
+                intent.putExtra("seoul","11");
+                startActivity(intent);
+
+
 
             }
         });
@@ -294,17 +309,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             @Override
                             public void onClick(View view) {
 
-                                mMap.clear(); //버스의 위치가 실시간으로 업데이트되면서 위치를 덮어쓰지못해 clear를 해줌으로써 중복이 되지않고 최신 상태 유지
+                             //   mMap.clear(); //버스의 위치가 실시간으로 업데이트되면서 위치를 덮어쓰지못해 clear를 해줌으로써 중복이 되지않고 최신 상태 유지
 
-                                for (int i = 0; i < apiExplorer.arrayList.size(); i++) {
-                                    ArrayList<Ob> multi_marker_list = new ArrayList<>();
-                                    multi_marker_list.add(new Ob(apiExplorer.arrayList.get(i).getGpslati(),apiExplorer.arrayList.get(i).getGpslong(),
-                                            apiExplorer.arrayList.get(i).getVehicleno(),apiExplorer.arrayList.get(i).getNodenm(),apiExplorer.arrayList.get(i).getRoutenm()));
-                                    for (Ob ob : multi_marker_list){
-                                        addCustomMarker(ob,false);
-                                    }
-                                }
-
+//                                for (int i = 0; i < apiExplorer.arrayList.size(); i++) {
+//                                    ArrayList<Ob> multi_marker_list = new ArrayList<>();
+//                                    multi_marker_list.add(new Ob(apiExplorer.arrayList.get(i).getGpslati(),apiExplorer.arrayList.get(i).getGpslong(),
+//                                            apiExplorer.arrayList.get(i).getVehicleno(),apiExplorer.arrayList.get(i).getNodenm(),apiExplorer.arrayList.get(i).getRoutenm()));
+//                                    for (Ob ob : multi_marker_list){
+//                                        addCustomMarker(ob,false);
+//                                    }
+//                                }
+                                setCustomMarkerView(); //custom marker
+                                getSampleMarkerItems();
 
                                 Toast.makeText(MainActivity.this,"새로고침 성공",Toast.LENGTH_LONG).show();
                             }
