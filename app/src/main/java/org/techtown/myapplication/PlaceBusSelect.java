@@ -46,11 +46,8 @@ public class PlaceBusSelect extends AppCompatActivity {
 
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         fragmentPagerAdapter = new ViewPagerAdapter_PlaceBusSelect(getSupportFragmentManager(),1);
+        ((ViewPagerAdapter_PlaceBusSelect) fragmentPagerAdapter).getText(getIntent().getStringExtra("seoul"));
         viewPager.setAdapter(fragmentPagerAdapter);
-
-
-
-
 
 
     }

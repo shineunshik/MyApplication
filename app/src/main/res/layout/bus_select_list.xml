@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:padding="10dp"
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:padding="10dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
 
     <LinearLayout
         android:orientation="horizontal"
@@ -172,9 +179,14 @@
 
 
 
-
+    </LinearLayout>
 
     </LinearLayout>
 
+    <ImageView
+        android:paddingHorizontal="5dp"
+        android:src="@color/black"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
 
 </LinearLayout>

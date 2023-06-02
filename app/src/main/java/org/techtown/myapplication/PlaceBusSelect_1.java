@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.techtown.myapplication.API_1.CustomAdapter_BusNumber;
@@ -43,22 +44,27 @@ public class PlaceBusSelect_1 extends Fragment {
     ArrayList<Ob_Bus_Select> arrayList;
     RecyclerView.LayoutManager layoutManager;
 
-    int num = 5;
-
+    int num = 20;
+    int n=0;
+    TextView index;
     public PlaceBusSelect_1() {
     }
 
-    public static PlaceBusSelect_1 newInstance() {
+    public static PlaceBusSelect_1 newInstance(String text) {
 
-        PlaceBusSelect_1 fragment = new PlaceBusSelect_1();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
+        PlaceBusSelect_1 placeBusSelect_1 = new PlaceBusSelect_1();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("seoul",text);
+        placeBusSelect_1.setArguments(bundle);
+        return placeBusSelect_1;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
     }
 
     @Override
@@ -66,12 +72,24 @@ public class PlaceBusSelect_1 extends Fragment {
         view = inflater.inflate(R.layout.fragment_place_bus_select_1, container, false);
 
         search_view = view.findViewById(R.id.search_view);
+        search_view.setOnClickListener(new View.OnClickListener() {//searchview의 전체 영역을 사용할수있도록 함
+            @Override
+            public void onClick(View view) {
+                search_view.setIconified(false);
+            }
+        });
+
+
         recyclerview = view.findViewById(R.id.recyclerview);
+        index = view.findViewById(R.id.index);
 
         layoutManager = new GridLayoutManager(getActivity(), 1);  //가로 2개씪 (그리드)
         recyclerview.setLayoutManager(new GridLayoutManager(getActivity(), 1));
         recyclerview.setHasFixedSize(true);
         arrayList = new ArrayList<>();//이거는 항상 맨 위에
+
+        Bundle bundle = getArguments();
+        String city_code = bundle.getString("seoul");
 
         new Thread(new Runnable() {
             public void run() {
@@ -79,18 +97,23 @@ public class PlaceBusSelect_1 extends Fragment {
 
                 try{
 
-                    for (int n = 0; n <2; n++){
 
+
+                    while (n<2){ //두번호출 최초에 20개만 불러오고 totalcount를 입력 받은 다음 두번째에는 전체 다 불러오기
+
+
+                    n++;
+
+                    System.out.println("\n"+"\n"+"nnnnnnn : "+n+"\n"+ "city_code : "+city_code);
 
                     //API를 사용하기위한 API정보 가져오기(기본 샘플 코드)
                     StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteNoList"); /*URL*/
                     urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=mpCKK0vB8d8I%2FXawDUzzlAsLZVdxFbFTUSFg6sBzw9tp3kLhU7H%2Bu2qlNbNaI0IK8gD0NK4Laky19EEQo3qALg%3D%3D"); /*Service Key*/
                     urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8"));
                     urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode(String.valueOf(num), "UTF-8"));
-                        System.out.println("결과수2222222 : "+String.valueOf(num));
                     urlBuilder.append("&" + URLEncoder.encode("_type","UTF-8") + "=" + URLEncoder.encode("xml", "UTF-8"));
-                    urlBuilder.append("&" + URLEncoder.encode("cityCode","UTF-8") + "=" + URLEncoder.encode("25", "UTF-8"));
-                    urlBuilder.append("&" + URLEncoder.encode("routeNo","UTF-8") + "=" + URLEncoder.encode("5", "UTF-8"));
+                    urlBuilder.append("&" + URLEncoder.encode("cityCode","UTF-8") + "=" + URLEncoder.encode(city_code, "UTF-8"));
+                    urlBuilder.append("&" + URLEncoder.encode("routeNo","UTF-8") + "=" + URLEncoder.encode("", "UTF-8"));
                     URL url = new URL(urlBuilder.toString());
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
@@ -150,25 +173,46 @@ public class PlaceBusSelect_1 extends Fragment {
                                     ob_bus_select.setEndnodenm(getTagValue("endnodenm", eElement));
                                     ob_bus_select.setRouteno(getTagValue("routeno", eElement));
                                     ob_bus_select.setRoutetp(getTagValue("routetp", eElement));
-
                                     arrayList.add(ob_bus_select);
 
-
+                                    index.setText("total : "+num+" / "+arrayList.size()+" 개 검색");
                                 }
                             }
-
                             adapter = new CustomAdapter_Bus_Select(arrayList, getActivity());
                             recyclerview.setAdapter(adapter);
 
                         }
                     });
 
+                    search_view.setQueryHint("버스 번호, 정류장 이름");
+                    search_view.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                        @Override //값을 받아왔을때 처리
+                        public boolean onQueryTextSubmit(String s) {
+                            search(s);
+                            --n;
+                            if(s==null||s.length()==0){
+                                n=0;
+                            }
+                            return false;
+                        }
+
+                        @Override //값이 변했을때 처리
+                        public boolean onQueryTextChange(String s) {
+                            search(s);
+                            --n;
+                            if(s==null||s.length()==0){
+                                n=0;
+                            }
+                            return true;
+                        }
+                    });
+
 
                     }
 
+
                 }
                 catch (IOException e){
-
                     e.printStackTrace();
                 } catch (ParserConfigurationException e) {
                     System.out.println("실패1");
@@ -178,32 +222,8 @@ public class PlaceBusSelect_1 extends Fragment {
                     e.printStackTrace();
                 }
 
-
             }
         }).start();
-
-//리사이클러뷰에 arraylist를 뿌려준다 adapter로 연결결
-
-
-        search_view.setQueryHint("버스 번호, 정류장 이름");
-        search_view.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override //값을 받아왔을때 처리
-            public boolean onQueryTextSubmit(String s) {
-                search(s);
-                return false;
-            }
-
-            @Override //값이 변했을때 처리
-            public boolean onQueryTextChange(String s) {
-                search(s);
-                return true;
-            }
-        });
-
-
-
-
-
 
         return view;
     }
@@ -219,6 +239,7 @@ public class PlaceBusSelect_1 extends Fragment {
                 if(object.getRouteno().toLowerCase().contains(charText.toLowerCase())||object.getEndnodenm().toLowerCase().contains(charText.toLowerCase())||object.getStartnodenm().toLowerCase().contains(charText.toLowerCase()))
                 { //입력된 글자가 Ob_User_BCD 겍체인 Address 와 일치하면 myList 에 담기
                     myList.add(object);
+                    index.setText("total : "+num+" / "+arrayList.size()+" 개 검색");
                 }
             } catch (RuntimeException nullPointerException){
 
@@ -236,7 +257,5 @@ public class PlaceBusSelect_1 extends Fragment {
             return null;
         return nValue.getNodeValue();
     }
-
-
 
 }

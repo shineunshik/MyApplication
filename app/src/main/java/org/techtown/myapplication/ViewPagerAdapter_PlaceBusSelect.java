@@ -18,7 +18,7 @@ public class ViewPagerAdapter_PlaceBusSelect extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position){
             case 0:
-                return PlaceBusSelect_1.newInstance();
+                return PlaceBusSelect_1.newInstance(text);
             default:
                 return null;
         }
