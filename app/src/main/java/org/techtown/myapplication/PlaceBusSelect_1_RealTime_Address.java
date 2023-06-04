@@ -252,6 +252,8 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
                         }
                         runOnUiThread(new Runnable() {//스레드 안에서 ui를 변경할 수 있게 해주는 스레드
                             public void run() {
+                                
+                                ArrayList<LatLng> point = new ArrayList<>();
 
                                 for (int i = 0; i < station_address.arrayList2.size(); i++) {
 
@@ -262,9 +264,18 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
                                     for (Ob_Station ob_station : multi_marker_station_list){
                                         addCustomMarker2(ob_station, false);
-                                        addPolyLine(multi_marker_station_list);
                                     }
+
+                                    point.add(i,new LatLng(station_address.arrayList2.get(i).getGpslati(),station_address.arrayList2.get(i).getGpslong()));
+
                                 }
+
+                                PolylineOptions polylineOptions;
+                                polylineOptions = new PolylineOptions();
+                                polylineOptions.color(Color.RED);
+                                polylineOptions.width(10);
+                                polylineOptions.addAll(point);
+                                mMap.addPolyline(polylineOptions);
 
                             }
                         });
@@ -274,42 +285,6 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
     }
 
-    public void addPolyLine(ArrayList<Ob_Station> arrayList){
-
-
-
-
-        new Thread(new Runnable() {
-            public void run() {
-                runOnUiThread(new Runnable() {//스레드 안에서 ui를 변경할 수 있게 해주는 스레드
-                    public void run() {
-                        PolylineOptions polylineOptions;
-                        polylineOptions = new PolylineOptions();
-                        ArrayList<LatLng> point;
-                        point = new ArrayList<>();
-                        for (int i = 0; i <arrayList.size();i++){
-
-
-                            polylineOptions.color(Color.RED);
-                            polylineOptions.width(10);
-                            LatLng latLng1 = new LatLng(arrayList.get(i).getGpslati(),arrayList.get(i).getGpslong());
-                            point.add(latLng1);
-
-                            //윗처럼 위도 경도를 호출해서 하면 라인이 안그어지고
-                            //임의로 위도 경도를 적어서 하면 라인이 그어짐  원인을 알아내야함
-                            Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,arrayList.get(i).getGpslati()+","+arrayList.get(i).getGpslong(),Toast.LENGTH_SHORT).show();
-
-                        }
-
-                        polylineOptions.addAll(point);
-                        mMap.addPolyline(polylineOptions);
-
-
-                    }
-                });
-            }
-        }).start();
-    }
 
     private Marker addCustomMarker(Ob ob, boolean isSelectedMarker) {
 
