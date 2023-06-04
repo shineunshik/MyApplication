@@ -37,6 +37,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 
 public class PlaceBusSelect_1 extends Fragment {
+    NodeList nlList;
+    Node nValue;
     View view;
     SearchView search_view;
     RecyclerView recyclerview;
@@ -97,15 +99,8 @@ public class PlaceBusSelect_1 extends Fragment {
 
                 try{
 
-
-
                     while (n<2){ //두번호출 최초에 20개만 불러오고 totalcount를 입력 받은 다음 두번째에는 전체 다 불러오기
-
-
                     n++;
-
-                    System.out.println("\n"+"\n"+"nnnnnnn : "+n+"\n"+ "city_code : "+city_code);
-
                     //API를 사용하기위한 API정보 가져오기(기본 샘플 코드)
                     StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteNoList"); /*URL*/
                     urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=mpCKK0vB8d8I%2FXawDUzzlAsLZVdxFbFTUSFg6sBzw9tp3kLhU7H%2Bu2qlNbNaI0IK8gD0NK4Laky19EEQo3qALg%3D%3D"); /*Service Key*/
@@ -163,19 +158,32 @@ public class PlaceBusSelect_1 extends Fragment {
 
                                 Node nNode = nList.item(temp);
                                 if(nNode.getNodeType() == Node.ELEMENT_NODE){
+
                                     //log 확인 작업
                                     Element eElement = (Element) nNode;
                                     //오브젝트 생성 후 해당 오브젝트에 담은 데이터를 arraylist에 담는다
                                     Ob_Bus_Select ob_bus_select = new Ob_Bus_Select();
-                                    ob_bus_select.setStartvehicletime(getTagValue("startvehicletime", eElement));
-                                    ob_bus_select.setEndvehicletime(getTagValue("endvehicletime", eElement));
-                                    ob_bus_select.setStartnodenm(getTagValue("startnodenm", eElement));
                                     ob_bus_select.setEndnodenm(getTagValue("endnodenm", eElement));
+                                    ob_bus_select.setRouteid(getTagValue("routeid",eElement));
                                     ob_bus_select.setRouteno(getTagValue("routeno", eElement));
                                     ob_bus_select.setRoutetp(getTagValue("routetp", eElement));
+                                    ob_bus_select.setStartnodenm(getTagValue("startnodenm", eElement));
+                                    try{
+                                        ob_bus_select.setStartvehicletime(getTagValue("startvehicletime", eElement));
+                                    }
+                                    catch (NullPointerException nullPointerException){
+                                        ob_bus_select.setStartvehicletime("준비중");
+                                    }
+                                    try{
+                                        ob_bus_select.setEndvehicletime(getTagValue("endvehicletime", eElement));
+                                    }
+                                    catch (NullPointerException nullPointerException){
+                                        ob_bus_select.setEndvehicletime("준비중");
+                                    }
+                                    ob_bus_select.setCitycode(city_code);
                                     arrayList.add(ob_bus_select);
-
                                     index.setText("total : "+num+" / "+arrayList.size()+" 개 검색");
+
                                 }
                             }
                             adapter = new CustomAdapter_Bus_Select(arrayList, getActivity());
@@ -183,8 +191,6 @@ public class PlaceBusSelect_1 extends Fragment {
 
                         }
                     });
-
-                    search_view.setQueryHint("버스 번호, 정류장 이름");
                     search_view.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                         @Override //값을 받아왔을때 처리
                         public boolean onQueryTextSubmit(String s) {
@@ -220,6 +226,8 @@ public class PlaceBusSelect_1 extends Fragment {
                 } catch (SAXException e) {
                     System.out.println("실패2");
                     e.printStackTrace();
+                }catch (NullPointerException e){
+
                 }
 
             }
@@ -250,12 +258,12 @@ public class PlaceBusSelect_1 extends Fragment {
         adapter.notifyDataSetChanged(); // 리스트 저장, 새로고침
     }
 
-    private static String getTagValue(String tag, Element eElement) {
-        NodeList nlList = eElement.getElementsByTagName(tag).item(0).getChildNodes();
-        Node nValue = (Node) nlList.item(0);
-        if(nValue == null)
+    public  String getTagValue(String tag, Element eElement) {
+        nlList = eElement.getElementsByTagName(tag).item(0).getChildNodes();
+        nValue = (Node) nlList.item(0);
+        if (nValue == null) {
             return null;
+        }
         return nValue.getNodeValue();
     }
-
 }

@@ -1,10 +1,12 @@
 package org.techtown.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -67,6 +69,22 @@ public class CustomAdapter_Bus_Select extends RecyclerView.Adapter<CustomAdapter
             last_time = itemView.findViewById(R.id.last_time);
             first_time = itemView.findViewById(R.id.first_time);
             view = itemView;
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getLayoutPosition();
+                    Intent intent = new Intent(context,PlaceBusSelect_1_RealTime_Address.class);
+                    intent.putExtra("cityCode",arrayList.get(position).getCitycode());
+                    intent.putExtra("routeId",arrayList.get(position).getRouteid());
+                    intent.putExtra("endnodenm",arrayList.get(position).getEndnodenm());
+                    intent.putExtra("startnodenm",arrayList.get(position).getStartnodenm());
+                    intent.putExtra("station","http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteAcctoThrghSttnList");
+                    intent.putExtra("realtimeAddress","http://apis.data.go.kr/1613000/BusLcInfoInqireService/getRouteAcctoBusLcList");
+                    context.startActivity(intent);
+                }
+            });
+
         }
     }
 }

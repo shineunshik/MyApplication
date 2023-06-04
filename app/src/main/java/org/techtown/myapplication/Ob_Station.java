@@ -2,29 +2,33 @@ package org.techtown.myapplication;
 
 import java.io.Serializable;
 
-public class Ob implements Serializable {
+public class Ob_Station implements Serializable { //노선별 경유정류소 목록
 
     Double gpslati; //위도
     Double gpslong; //경도
-    String vehicleno; //버스 번호판
+    String nodeid; //정류소ID
     String nodenm; //정류소
     String nodeord;//정류소 순번
-    String routenm; //노선번호
-    String nodeid; //정류소ID
+    String  routeid ; //노선ID  옵션
     String endnodenm; //종점
     String startnodenm; //기점
 
-    public Ob(Double gpslati,Double gpslong,String vehicleno,String nodenm,String routenm,String nodeid){
+    public Ob_Station(Double gpslati, Double gpslong, String nodeid,String nodenm,String nodeord,String routeid){
         this.gpslati = gpslati;
         this.gpslong = gpslong;
-        this.vehicleno = vehicleno;
+        this.nodeid = nodeid;
         this.nodenm = nodenm;
-        this.routenm = routenm;
+        this.nodeord = nodeord;
+        this.routeid = routeid;
+    }
+
+    public Ob_Station( String nodeid){
         this.nodeid = nodeid;
     }
-    public Ob(){
+    public Ob_Station(){
 
     }
+
 
     public String getEndnodenm() {
         return endnodenm;
@@ -50,22 +54,6 @@ public class Ob implements Serializable {
         this.nodenm = nodenm;
     }
 
-    public String getRoutenm() {
-        return routenm;
-    }
-
-    public void setRoutenm(String routenm) {
-        this.routenm = routenm;
-    }
-
-    public String getVehicleno() {
-        return vehicleno;
-    }
-
-    public void setVehicleno(String vehicleno) {
-        this.vehicleno = vehicleno;
-    }
-
 
     public Double getGpslati() {
         return gpslati;
@@ -83,7 +71,6 @@ public class Ob implements Serializable {
         this.gpslong = gpslong;
     }
 
-
     public String getNodeord() {
         return nodeord;
     }
@@ -92,6 +79,13 @@ public class Ob implements Serializable {
         this.nodeord = nodeord;
     }
 
+    public String getRouteid() {
+        return routeid;
+    }
+
+    public void setRouteid(String routeid) {
+        this.routeid = routeid;
+    }
 
     public String getNodeid() {
         return nodeid;

@@ -19,15 +19,11 @@
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="33">
         <activity
-            android:name=".PlaceBusSelect"
+            android:name=".PlaceBusSelect_1_RealTime_Address"
             android:exported="false" />
         <activity
-            android:name=".MainActivity2"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+            android:name=".PlaceBusSelect"
+            android:exported="false" />
         <activity
             android:name=".API_1.Kyungki_Bus_API_1"
             android:exported="false">

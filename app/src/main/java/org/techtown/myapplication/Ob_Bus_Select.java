@@ -9,10 +9,19 @@ public class Ob_Bus_Select {
     String routetp; //버스 종류
     String startnodenm; //기점
     String startvehicletime; //첫차시간
+    String citycode; //도시 코드
 
 
     public Ob_Bus_Select(){
 
+    }
+
+    public String getCitycode() {
+        return citycode;
+    }
+
+    public void setCitycode(String citycode) {
+        this.citycode = citycode;
     }
 
     public String getEndnodenm() {
