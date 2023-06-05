@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -73,20 +74,7 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        setCustomMarkerView(); //custom marker
-        getSampleMarkerItems();
-        getSampleMarkerItems2();
 
-        refresh = (Button)findViewById(R.id.refresh);
-        refresh.setOnClickListener(new View.OnClickListener() { //새로 고침
-            @Override
-            public void onClick(View view) {
-                ++num;
-                getSampleMarkerItems();
-                getSampleMarkerItems2();
-                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,"새로고침 성공"+num,Toast.LENGTH_SHORT).show();
-            }
-        });
 
     }
 
@@ -150,6 +138,30 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
         mMap.setOnMarkerClickListener(this);
 
 
+        setCustomMarkerView(); //custom marker
+        getSampleMarkerItems2();
+        getSampleMarkerItems();
+
+//        new Thread(new Runnable() {
+//            public void run() {
+//
+//                timer = new Timer();
+//                timerTask = new TimerTask() {
+//                    @Override
+//                    public void run() {
+//
+//                        getSampleMarkerItems();
+//
+//                            }
+//                        };
+//                timer.schedule(timerTask,0,3000);
+//
+//            }
+//        }).start();
+
+
+
+
 
 
     }
@@ -181,12 +193,8 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
     }
 
 
-
-    private void getSampleMarkerItems( ){
-        timer = new Timer();
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
+    private void getSampleMarkerItems(){
+        MarkerOptions markerOptions;
                 new Thread(new Runnable() {
                     public void run() {
 
@@ -207,22 +215,24 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
                                 for (int i = 0; i < realTime_address.arrayList.size(); i++) {
 
-
                                     multi_marker_list.add(new Ob(realTime_address.arrayList.get(i).getGpslati(),realTime_address.arrayList.get(i).getGpslong(),
                                             realTime_address.arrayList.get(i).getVehicleno(),realTime_address.arrayList.get(i).getNodenm(),realTime_address.arrayList.get(i).getRoutenm(),realTime_address.arrayList.get(i).getNodeid()));
 
                                     for (Ob ob : multi_marker_list){
+                                      //  addCustomMarker(ob,false);
 
-                                     //   addCustomMarker(ob,false,num).remove();
+                                        LatLng position = new LatLng(ob.getGpslati(),ob.getGpslong());
+                                        name.setText("차량번호:"+ob.getVehicleno()+"\n"+"노선번호:"+ob.getRoutenm()+"\n"+"정류장:"+ob.getNodenm());
 
-                                        addCustomMarker(ob,false);
+                                        markerOptions = new MarkerOptions();
+                                        markerOptions.title("차량번호:"+ob.getVehicleno());
+                                        //  markerOptions.snippet("노선번호:"+ob.getRoutenm()+"\n"+"현재 정류장:"+ob.getNodenm());
+                                        markerOptions.snippet("현재 정류장:"+ob.getNodenm());
+                                        markerOptions.position(position);
+                                        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(PlaceBusSelect_1_RealTime_Address.this, Custom_Marker)));
 
-//                                        marker.setTag(ob.getVehicleno()+"/"+ob.getNodenm()+"/"+ob.getRoutenm()+"/");
-//                                        marker.remove();
-//                                        marker.setPosition(position);
-
-
-
+                                        Marker marker = mMap.addMarker(markerOptions);
+                                        marker.setTag(ob.getVehicleno()+"/"+ob.getNodenm()+"/"+ob.getRoutenm()+"/");
 
                                         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                                             //여기서 클릭 리스너 구현을 하고 클릭했을때 밑에 상세정보 카드뷰가 나오게 하기
@@ -236,6 +246,41 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
                                             }
                                         });
 
+                                        refresh = (Button)findViewById(R.id.refresh);
+                                        refresh.setOnClickListener(new View.OnClickListener() { //새로 고침
+                                            @Override
+                                            public void onClick(View view) {
+                                                new Thread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        runOnUiThread(new Runnable() {//스레드 안에서 ui를 변경할 수 있게 해주는 스레드
+                                                            public void run() {
+
+                                                          marker.remove(); //핸들러에서는 삭제가되는데 버큰이랑 메인쓰레드 타임스레드에서는 삭제가 되지않음
+                                                      //  Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,"새로고침 성공"+num,Toast.LENGTH_SHORT).show();
+
+                                                            }
+                                                        });
+
+
+                                                    }
+                                                }).start();
+
+                                            }
+                                        });
+                                        //
+//                                        Handler handler = new Handler();
+//                                        handler.postDelayed(new Runnable() {
+//                                            @Override
+//                                            public void run() {
+//
+//                                                marker.remove();
+//                                                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,"삭제",Toast.LENGTH_SHORT).show();
+//
+//                                            }
+//                                        }, 5000);
+
+
                                     }
                                 }
                             }
@@ -243,17 +288,11 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
                     }
                 }).start();
-                 }
-            };
-    timer.schedule(timerTask,0,3000);
-
 
     }
 
 
     private void getSampleMarkerItems2(){
-
-
         new Thread(new Runnable() {
             public void run() {
                 RealTime_Address station_address = new RealTime_Address(getIntent().getStringExtra("cityCode"),getIntent().getStringExtra("routeId"),getIntent().getStringExtra("station"),getIntent().getStringExtra("endnodenm"),getIntent().getStringExtra("startnodenm"));
@@ -325,6 +364,8 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
         markerOptions.position(position);
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this, Custom_Marker)));
 
+
+
         //markeroption에서는 저장할수있는 정보가 정해져있어서
         //내가 원하는 정보를 저장하려면 새로운 marker형식의 저장소를 만들어 내가 원하는
         //데이터를 / 슬래쉬로 구분하여 전부 집어 넣음
@@ -332,7 +373,33 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
         Marker marker = mMap.addMarker(markerOptions);
         marker.setTag(ob.getVehicleno()+"/"+ob.getNodenm()+"/"+ob.getRoutenm()+"/");
-        marker.setPosition(position);
+       // marker.setPosition(position);
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            //여기서 클릭 리스너 구현을 하고 클릭했을때 밑에 상세정보 카드뷰가 나오게 하기
+            @Override
+            public boolean onMarkerClick(@NonNull Marker marker) {
+                //정보를 빼서 쓸때는 슬래쉬로 구분하여 뺴서 씀
+                String[] arr = marker.getTag().toString().split("/");
+                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,arr[0]+"\n"+arr[1]+"\n"+arr[2],Toast.LENGTH_SHORT).show();
+                //marker 클릭했을때 원하는 정보 띄우는거까지 성공
+                return false;
+            }
+        });
+     //
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                marker.remove();
+
+                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,"삭제",Toast.LENGTH_SHORT).show();
+
+            }
+        }, 5000);
+
+
+
         return mMap.addMarker(markerOptions);
 
     }
