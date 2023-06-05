@@ -24,12 +24,14 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -62,19 +64,29 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
     View Custom_Marker;
     Timer timer;
     TimerTask timerTask;
-    int num = 1;
+    int num = 2;
     SupportMapFragment mapFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.place_bus_select1_real_time_address);
         setContentView(R.layout.bus_map);
-
-      //  Toast.makeText(this,"SDfsdfsdfsd",Toast.LENGTH_SHORT).show();
-
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        setCustomMarkerView(); //custom marker
+        getSampleMarkerItems();
+        getSampleMarkerItems2();
+
+        refresh = (Button)findViewById(R.id.refresh);
+        refresh.setOnClickListener(new View.OnClickListener() { //새로 고침
+            @Override
+            public void onClick(View view) {
+                ++num;
+                getSampleMarkerItems();
+                getSampleMarkerItems2();
+                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,"새로고침 성공"+num,Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
@@ -82,10 +94,49 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap;
         mMap2 = googleMap;
+        mMap = googleMap;
 
 
+        try {
+            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            Location location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER); //gps신호 받아오기
+            Location location1 =manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);// 네트워크 신호받아오기
+            if (location != null) { //gps 수신(gps 신호는 최근에 받아왔던 신호를 받아오기때문에 재부팅을하면 gps신호가 사라져서 null값을 가져옴 그래서 네트워크 신호도 가져오게 함)
+                if (num == 1) {
+                    ++num; //최초 한번만 나의 위치로 포커스 되도록 함
+                    double lat, lng;
+                    lat = location.getLatitude();
+                    lng = location.getLongitude();
+                    LatLng my_addresss = new LatLng(lat, lng);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(my_addresss, 15));
+                }
+            }
+            else if (location1 != null) { //네트워크로 수신
+                if (num == 1) {
+                    ++num; //최초 한번만 나의 위치로 포커스 되도록 함
+                    double lat, lng;
+                    lat = location1.getLatitude();
+                    lng = location1.getLongitude();
+                    LatLng my_addresss = new LatLng(lat, lng);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(my_addresss, 15));
+                }
+            }
+
+            PlaceBusSelect_1_RealTime_Address.GPSListener gpsListener = new PlaceBusSelect_1_RealTime_Address.GPSListener();
+            long minTime = 1000;  //10초마다  위치 갱신
+            float minDistance = 0; //최소 거리 0
+
+            manager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    minTime,
+                    minDistance, gpsListener);
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+            System.out.println("완전 실패\n완전 실패\n완전 실패\n완전 실패\n완전 실패\n완전 실패\n");
+
+        }
 
         mMap.setOnMyLocationButtonClickListener(this); //나침반을 누르면 나의 위치로 이동 기능
         mMap.setOnMyLocationClickListener(this); //나침반을 누르면 나의 위치로 이동 기능
@@ -97,8 +148,9 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
         }
         mMap.setMyLocationEnabled(true); //나침반 기능 사용 유무
         mMap.setOnMarkerClickListener(this);
-        setCustomMarkerView(); //custom marker
-        getSampleMarkerItems();
+
+
+
 
     }
 
@@ -130,17 +182,15 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
 
 
-    private void getSampleMarkerItems(){
-        refresh = (Button)findViewById(R.id.refresh);
-
-        timer = new Timer();//지정한 시간마다 리프레시
+    private void getSampleMarkerItems( ){
+        timer = new Timer();
         timerTask = new TimerTask() {
             @Override
             public void run() {
                 new Thread(new Runnable() {
                     public void run() {
 
-                       RealTime_Address realTime_address = new RealTime_Address(getIntent().getStringExtra("cityCode"),getIntent().getStringExtra("routeId"),getIntent().getStringExtra("realtimeAddress"),getIntent().getStringExtra("endnodenm"),getIntent().getStringExtra("startnodenm"));
+                        RealTime_Address realTime_address = new RealTime_Address(getIntent().getStringExtra("cityCode"),getIntent().getStringExtra("routeId"),getIntent().getStringExtra("realtimeAddress"),getIntent().getStringExtra("endnodenm"),getIntent().getStringExtra("startnodenm"));
 
                         try {
                             realTime_address.RealTime_Address_Call(); //실시간 버스 위치
@@ -151,143 +201,108 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
 
                         runOnUiThread(new Runnable() {//스레드 안에서 ui를 변경할 수 있게 해주는 스레드
                             public void run() {
-
-                                try {
-                                    LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                                    Location location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER); //gps신호 받아오기
-                                    Location location1 =manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);// 네트워크 신호받아오기
-                                    if (location != null) { //gps 수신(gps 신호는 최근에 받아왔던 신호를 받아오기때문에 재부팅을하면 gps신호가 사라져서 null값을 가져옴 그래서 네트워크 신호도 가져오게 함)
-                                        if (num == 1) {
-                                            ++num; //최초 한번만 나의 위치로 포커스 되도록 함
-                                            double lat, lng;
-                                            lat = location.getLatitude();
-                                            lng = location.getLongitude();
-                                            LatLng my_addresss = new LatLng(lat, lng);
-                                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(my_addresss, 15));
-                                        }
-                                    }
-                                    else if (location1 != null) { //네트워크로 수신
-                                        if (num == 1) {
-                                            ++num; //최초 한번만 나의 위치로 포커스 되도록 함
-                                            double lat, lng;
-                                            lat = location1.getLatitude();
-                                            lng = location1.getLongitude();
-                                            LatLng my_addresss = new LatLng(lat, lng);
-                                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(my_addresss, 15));
-                                        }
-                                    }
-
-                                    PlaceBusSelect_1_RealTime_Address.GPSListener gpsListener = new PlaceBusSelect_1_RealTime_Address.GPSListener();
-                                    long minTime = 1000;  //10초마다  위치 갱신
-                                    float minDistance = 0; //최소 거리 0
-
-                                    manager.requestLocationUpdates(
-                                            LocationManager.GPS_PROVIDER,
-                                            minTime,
-                                            minDistance, gpsListener);
-
-                                } catch (SecurityException e) {
-                                    e.printStackTrace();
-                                    System.out.println("완전 실패\n완전 실패\n완전 실패\n완전 실패\n완전 실패\n완전 실패\n");
-
-                                }
-
-                             //   mMap.clear(); //버스의 위치가 실시간으로 업데이트되면서 위치를 덮어쓰지못해 clear를 해줌으로써 중복이 되지않고 최신 상태 유지
-
+                              //  mMap.clear(); //버스의 위치가 실시간으로 업데이트되면서 위치를 덮어쓰지못해 clear를 해줌으로써 중복이 되지않고 최신 상태 유지
+                                ArrayList<Ob> multi_marker_list = new ArrayList<>();
+                                MarkerOptions markerOptions = new MarkerOptions();
 
                                 for (int i = 0; i < realTime_address.arrayList.size(); i++) {
 
-                                    ArrayList<Ob> multi_marker_list = new ArrayList<>();
+
                                     multi_marker_list.add(new Ob(realTime_address.arrayList.get(i).getGpslati(),realTime_address.arrayList.get(i).getGpslong(),
                                             realTime_address.arrayList.get(i).getVehicleno(),realTime_address.arrayList.get(i).getNodenm(),realTime_address.arrayList.get(i).getRoutenm(),realTime_address.arrayList.get(i).getNodeid()));
+
                                     for (Ob ob : multi_marker_list){
+
+                                     //   addCustomMarker(ob,false,num).remove();
+
                                         addCustomMarker(ob,false);
+
+//                                        marker.setTag(ob.getVehicleno()+"/"+ob.getNodenm()+"/"+ob.getRoutenm()+"/");
+//                                        marker.remove();
+//                                        marker.setPosition(position);
+
+
+
+
+                                        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                            //여기서 클릭 리스너 구현을 하고 클릭했을때 밑에 상세정보 카드뷰가 나오게 하기
+                                            @Override
+                                            public boolean onMarkerClick(@NonNull Marker marker) {
+                                                //정보를 빼서 쓸때는 슬래쉬로 구분하여 뺴서 씀
+                                                String[] arr = marker.getTag().toString().split("/");
+                                                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,arr[0]+"\n"+arr[1]+"\n"+arr[2],Toast.LENGTH_SHORT).show();
+                                                //marker 클릭했을때 원하는 정보 띄우는거까지 성공
+                                                return false;
+                                            }
+                                        });
+
                                     }
                                 }
-                            }
-                        });
-
-
-                        refresh.setOnClickListener(new View.OnClickListener() { //새로 고침
-                            @Override
-                            public void onClick(View view) {
-
-                               mMap.clear(); //버스의 위치가 실시간으로 업데이트되면서 위치를 덮어쓰지못해 clear를 해줌으로써 중복이 되지않고 최신 상태 유지
-
-                                for (int i = 0; i < realTime_address.arrayList.size(); i++) {
-
-                                    ArrayList<Ob> multi_marker_list = new ArrayList<>();
-                                    multi_marker_list.add(new Ob(realTime_address.arrayList.get(i).getGpslati(),realTime_address.arrayList.get(i).getGpslong(),
-                                            realTime_address.arrayList.get(i).getVehicleno(),realTime_address.arrayList.get(i).getNodenm(),realTime_address.arrayList.get(i).getRoutenm(),realTime_address.arrayList.get(i).getNodeid()));
-                                    for (Ob ob : multi_marker_list){
-                                        addCustomMarker(ob,false);
-                                    }
-                                }
-
-                            //    setCustomMarkerView(); //custom marker
-                            //    getSampleMarkerItems();
-
-                                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,"새로고침 성공",Toast.LENGTH_LONG).show();
                             }
                         });
 
                     }
                 }).start();
-
-            }
-        };
-        timer.schedule(timerTask,0,5000);
-
-
-
-                new Thread(new Runnable() {
-                    public void run() {
-                        RealTime_Address station_address = new RealTime_Address(getIntent().getStringExtra("cityCode"),getIntent().getStringExtra("routeId"),getIntent().getStringExtra("station"),getIntent().getStringExtra("endnodenm"),getIntent().getStringExtra("startnodenm"));
-
-                        try {
-                            station_address.RealTime_Address_Call(); //정류소 위치
-
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        runOnUiThread(new Runnable() {//스레드 안에서 ui를 변경할 수 있게 해주는 스레드
-                            public void run() {
-                                
-                                ArrayList<LatLng> point = new ArrayList<>();
-
-                                for (int i = 0; i < station_address.arrayList2.size(); i++) {
-
-                                    ArrayList<Ob_Station> multi_marker_station_list = new ArrayList<>();
-                                    multi_marker_station_list.add(new Ob_Station(station_address.arrayList2.get(i).getGpslati(),station_address.arrayList2.get(i).getGpslong(),
-                                            station_address.arrayList2.get(i).getNodeid(),station_address.arrayList2.get(i).getNodenm()
-                                            ,station_address.arrayList2.get(i).getNodeord(),station_address.arrayList2.get(i).getRouteid()));
-
-                                    for (Ob_Station ob_station : multi_marker_station_list){
-                                        addCustomMarker2(ob_station, false);
-                                    }
-
-                                    point.add(i,new LatLng(station_address.arrayList2.get(i).getGpslati(),station_address.arrayList2.get(i).getGpslong()));
-
-                                }
-
-                                PolylineOptions polylineOptions;
-                                polylineOptions = new PolylineOptions();
-                                polylineOptions.color(Color.RED);
-                                polylineOptions.width(10);
-                                polylineOptions.addAll(point);
-                                mMap.addPolyline(polylineOptions);
-
-                            }
-                        });
-                    }
-                }).start();
+                 }
+            };
+    timer.schedule(timerTask,0,3000);
 
 
     }
 
 
-    private Marker addCustomMarker(Ob ob, boolean isSelectedMarker) {
+    private void getSampleMarkerItems2(){
 
+
+        new Thread(new Runnable() {
+            public void run() {
+                RealTime_Address station_address = new RealTime_Address(getIntent().getStringExtra("cityCode"),getIntent().getStringExtra("routeId"),getIntent().getStringExtra("station"),getIntent().getStringExtra("endnodenm"),getIntent().getStringExtra("startnodenm"));
+
+                try {
+                    station_address.RealTime_Address_Call(); //정류소 위치
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                runOnUiThread(new Runnable() {//스레드 안에서 ui를 변경할 수 있게 해주는 스레드
+                    public void run() {
+
+                        ArrayList<LatLng> point = new ArrayList<>();
+
+                        for (int i = 0; i < station_address.arrayList2.size(); i++) {
+
+                            ArrayList<Ob_Station> multi_marker_station_list = new ArrayList<>();
+                            multi_marker_station_list.add(new Ob_Station(station_address.arrayList2.get(i).getGpslati(),station_address.arrayList2.get(i).getGpslong(),
+                                    station_address.arrayList2.get(i).getNodeid(),station_address.arrayList2.get(i).getNodenm()
+                                    ,station_address.arrayList2.get(i).getNodeord(),station_address.arrayList2.get(i).getRouteid()));
+
+                            for (Ob_Station ob_station : multi_marker_station_list){
+                                addCustomMarker2(ob_station, false);
+                            }
+
+                            point.add(i,new LatLng(station_address.arrayList2.get(i).getGpslati(),station_address.arrayList2.get(i).getGpslong()));
+
+                        }
+
+                        PolylineOptions polylineOptions;
+                        polylineOptions = new PolylineOptions();
+                        polylineOptions.color(Color.RED);
+                        polylineOptions.width(10);
+                        polylineOptions.addAll(point);
+                        mMap2.addPolyline(polylineOptions);
+
+                    }
+                });
+            }
+        }).start();
+
+
+    }
+
+
+
+    private Marker addCustomMarker(Ob ob, boolean isSelectedMarker) {
+       // mMap.clear();
         LatLng position = new LatLng(ob.getGpslati(),ob.getGpslong());
         name.setText("차량번호:"+ob.getVehicleno()+"\n"+"노선번호:"+ob.getRoutenm()+"\n"+"정류장:"+ob.getNodenm());
 
@@ -314,23 +329,10 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
         //내가 원하는 정보를 저장하려면 새로운 marker형식의 저장소를 만들어 내가 원하는
         //데이터를 / 슬래쉬로 구분하여 전부 집어 넣음
         //정보를 빼서 쓸때는 슬래쉬로 구분하여 뺴서 씀
+
         Marker marker = mMap.addMarker(markerOptions);
         marker.setTag(ob.getVehicleno()+"/"+ob.getNodenm()+"/"+ob.getRoutenm()+"/");
-
-
-        //눌렀을때 떠있는 기본 정보
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            //여기서 클릭 리스너 구현을 하고 클릭했을때 밑에 상세정보 카드뷰가 나오게 하기
-            @Override
-            public boolean onMarkerClick(@NonNull Marker marker) {
-                //정보를 빼서 쓸때는 슬래쉬로 구분하여 뺴서 씀
-                String[] arr = marker.getTag().toString().split("/");
-                Toast.makeText(PlaceBusSelect_1_RealTime_Address.this,arr[0]+"\n"+arr[1]+"\n"+arr[2],Toast.LENGTH_SHORT).show();
-                //marker 클릭했을때 원하는 정보 띄우는거까지 성공
-                return false;
-            }
-        });
-
+        marker.setPosition(position);
         return mMap.addMarker(markerOptions);
 
     }
@@ -356,8 +358,6 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
       //  System.out.println("\n\n\n"+position);
 
 
-
-
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.title("정류장:"+ob_station.getNodenm());
       //  markerOptions.snippet("현재 정류장:"+ob_station.getNodenm());
@@ -368,12 +368,12 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
         //내가 원하는 정보를 저장하려면 새로운 marker형식의 저장소를 만들어 내가 원하는
         //데이터를 / 슬래쉬로 구분하여 전부 집어 넣음
         //정보를 빼서 쓸때는 슬래쉬로 구분하여 뺴서 씀
-        Marker marker = mMap.addMarker(markerOptions);
+        Marker marker = mMap2.addMarker(markerOptions);
         marker.setTag(ob_station.getNodenm()+"/"+ob_station.getNodeid()+"/"+ob_station.getStartnodenm()+"/");
 
 
         //눌렀을때 떠있는 기본 정보
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        mMap2.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             //여기서 클릭 리스너 구현을 하고 클릭했을때 밑에 상세정보 카드뷰가 나오게 하기
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
@@ -385,7 +385,7 @@ public class PlaceBusSelect_1_RealTime_Address extends AppCompatActivity impleme
             }
         });
 
-        return mMap.addMarker(markerOptions);
+        return mMap2.addMarker(markerOptions);
 
     }
 
