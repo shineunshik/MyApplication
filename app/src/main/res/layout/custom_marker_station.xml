@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout
-    android:id="@+id/real_view"
+    android:id="@+id/station_view"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -10,10 +10,10 @@
     <TextView
         android:paddingVertical="3dp"
         android:paddingHorizontal="5dp"
-        android:id="@+id/name"
+        android:id="@+id/station_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/black"
+        android:background="#B22222"
         android:gravity="center"
         android:text="정보"
         android:textColor="@color/white"
