@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 Intent intent = new Intent(MainActivity.this,PlaceBusSelect.class);
-                intent.putExtra("seoul","31020");
+                intent.putExtra("seoul","31040");  //성남 31020 안양 31040 용인 31190
                 startActivity(intent);
 
 
